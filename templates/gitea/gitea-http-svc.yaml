@@ -3,10 +3,7 @@ kind: Service
 metadata:
   name: {{ template "fullname" . }}-http
   labels:
-    app: {{ template "fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{- include "gitea.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.http.serviceType }}
   ports:
