@@ -1,8 +1,10 @@
+apiVersion: v1
 name: gitea
 version: 1.9.3
 appVersion: 1.9.3
 description: Git with a cup of tea
 icon: https://docs.gitea.io/images/gitea.png
+home: https://gitea.io
 keywords:
   - git
   - issue tracker
