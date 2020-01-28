@@ -4,10 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ template "fullname" . }}
   labels:
-    app: {{ template "fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{- include "gitea.labels" . | nindent 4 }}
 data:
   app.ini: |-
     ; This file lists the default values used by Gitea

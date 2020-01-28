@@ -3,10 +3,7 @@ kind: Service
 metadata:
   name: {{ template "fullname" . }}-ssh
   labels:
-    app: {{ template "fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
+    {{- include "gitea.labels" . | nindent 4 }}
   annotations:
 {{ toYaml .Values.service.ssh.svc_annotations | indent 4 }}
 spec:

@@ -1,0 +1,111 @@
+{{- if and .Values.initUser.enabled -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "gitea.initUser.serviceAccountName" . }}
+  namespace: "{{ .Release.namespace }}"
+  labels:
+    {{- include "gitea.labels" . | nindent 4 }}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "giteaInit.role.name" . }}
+  namespace: "{{ .Release.namespace }}"
+  labels:
+    {{- include "gitea.labels" . | nindent 4 }}
+rules:
+- apiGroups: [""]
+  resources: ["pods","services"]
+  verbs: ["list","get"]
+- apiGroups: [""]
+  resources: ["pods/exec","services/exec"]
+  verbs: ["create","delete","get","list","patch","update","watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get","create","delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: {{ template "giteaInit.role.name" . }}
+  namespace: "{{ .Release.namespace }}"
+  labels:
+    {{- include "gitea.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "giteaInit.role.name" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "gitea.initUser.serviceAccountName" . }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "giteaInit.cm.name" . }}
+  namespace: "{{ .Release.namespace }}"
+  labels:
+    {{- include "gitea.labels" . | nindent 4 }}
+data:
+  entrypoint.sh: |-
+    #!/bin/bash
+    sleep 40
+    kubectl exec -i svc/{{ template "fullname" . }}-ssh -c gitea -n ${NAMESPACE} -- /bin/bash -c "su git -c 'gitea admin create-user --random-password --email ${USER_EMAIL} --username ${USER_NAME} --access-token --admin'" > /tmp/tmpdata/.log.txt
+    echo "User Output"
+    cat /tmp/tmpdata/.log.txt
+    echo "User Output End"
+    TOKEN=$(cat /tmp/tmpdata/.log.txt | grep 'Access token was successfully created.*' | sed 's/.* //g')
+    echo "token=${TOKEN}" > /tmp/tmpdata/.log.txt
+    echo $(cat /tmp/tmpdata/.log.txt)
+    kubectl delete secret ${GITEA_ADMIN_SECRET_NAME} -n ${NAMESPACE}
+    kubectl create secret generic ${GITEA_ADMIN_SECRET_NAME} -n ${NAMESPACE} --from-env-file=/tmp/tmpdata/.log.txt
+    echo "created admin token secret: '${GITEA_ADMIN_SECRET_NAME}' in '${NAMESPACE}' created"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "giteaInit.fullname" . }}
+  namespace: "{{ .Release.namespace }}"
+  labels:
+    {{- include "gitea.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ template "gitea.initUser.serviceAccountName" . }}
+      containers:
+      - name: pi
+        image: bitnami/kubectl
+        command: ["/usr/local/bin/entrypoint.sh"]
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: GITEA_ADMIN_SECRET_NAME
+          value: "{{ .Values.initUser.secretName }}"
+        - name: USER_NAME
+          value: "localadmin"
+        - name: USER_EMAIL
+          value: "localadmin@locahost.local"
+        volumeMounts:
+        - name: tmpdata
+          mountPath: /tmp/tmpdata
+        - name: configmap-volume
+          mountPath: /usr/local/bin/entrypoint.sh
+          readOnly: true
+          subPath: entrypoint.sh
+      volumes:
+      - name: tmpdata
+        emptyDir: {}
+      - name: configmap-volume
+        configMap:
+          defaultMode: 0744
+          name: {{ template "giteaInit.cm.name" . }}
+      restartPolicy: Never
+  backoffLimit: 4
+{{- end -}}
