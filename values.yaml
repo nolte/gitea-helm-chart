@@ -3,7 +3,7 @@
 ##
 
 images:
-  gitea: "gitea/gitea:1.9.3"
+  gitea: "gitea/gitea:1.10.3"
   postgres: "postgres:11"
   memcached: "memcached:1.5.19-alpine"
   imagePullPolicy: Always
@@ -185,3 +185,13 @@ config:
 # extra_config: |-
 #   [service]
 #   ENABLE_USER_HEATMAP=false
+
+initUser:
+  enabled: false
+  # existingServiceAccount: 'secret'
+  secretName: gitea-admin-token
+  rbac:
+    create: true
+    serviceAccount:
+      create: true
+      name: ""

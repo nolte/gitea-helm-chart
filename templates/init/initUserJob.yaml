@@ -1,8 +1,9 @@
+{{- if and .Values.initUser.enabled -}}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ template "fullname" . }}-admin
+  name: {{ template "gitea.initUser.serviceAccountName" . }}
   namespace: "{{ .Release.namespace }}"
   labels:
     {{- include "gitea.labels" . | nindent 4 }}
@@ -10,7 +11,7 @@ metadata:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ template "fullname" . }}-role
+  name: {{ template "giteaInit.role.name" . }}
   namespace: "{{ .Release.namespace }}"
   labels:
     {{- include "gitea.labels" . | nindent 4 }}
@@ -29,30 +30,30 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: {{ template "fullname" . }}-rb
+  name: {{ template "giteaInit.role.name" . }}
   namespace: "{{ .Release.namespace }}"
   labels:
     {{- include "gitea.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ template "fullname" . }}-role
+  name: {{ template "giteaInit.role.name" . }}
 subjects:
 - kind: ServiceAccount
-  name: {{ template "fullname" . }}-admin
+  name: {{ template "gitea.initUser.serviceAccountName" . }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "fullname" . }}-init
+  name: {{ template "giteaInit.cm.name" . }}
   namespace: "{{ .Release.namespace }}"
   labels:
     {{- include "gitea.labels" . | nindent 4 }}
 data:
   entrypoint.sh: |-
     #!/bin/bash
-    sleep 15
-    kubectl exec -i svc/{{ template "fullname" . }}-ssh -n ${NAMESPACE} -- /bin/bash -c "su git -c 'gitea admin create-user --random-password --email ${USER_EMAIL} --username ${USER_NAME} --access-token --admin'" > /tmp/tmpdata/.log.txt
+    sleep 40
+    kubectl exec -i svc/{{ template "fullname" . }}-ssh -c gitea -n ${NAMESPACE} -- /bin/bash -c "su git -c 'gitea admin create-user --random-password --email ${USER_EMAIL} --username ${USER_NAME} --access-token --admin'" > /tmp/tmpdata/.log.txt
     echo "User Output"
     cat /tmp/tmpdata/.log.txt
     echo "User Output End"
@@ -66,7 +67,7 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "fullname" . }}-init
+  name: {{ template "giteaInit.fullname" . }}
   namespace: "{{ .Release.namespace }}"
   labels:
     {{- include "gitea.labels" . | nindent 4 }}
@@ -75,7 +76,7 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: {{ template "fullname" . }}-admin
+      serviceAccountName: {{ template "gitea.initUser.serviceAccountName" . }}
       containers:
       - name: pi
         image: bitnami/kubectl
@@ -86,9 +87,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         - name: GITEA_ADMIN_SECRET_NAME
-          value: "gitea-admin-token"
-        - name: POD_SELECTOR
-          value: "app=p3s-gitea-gitea"
+          value: "{{ .Values.initUser.secretName }}"
         - name: USER_NAME
           value: "localadmin"
         - name: USER_EMAIL
@@ -106,6 +105,7 @@ spec:
       - name: configmap-volume
         configMap:
           defaultMode: 0744
-          name: {{ template "fullname" . }}-init
+          name: {{ template "giteaInit.cm.name" . }}
       restartPolicy: Never
   backoffLimit: 4
+{{- end -}}
