@@ -63,6 +63,11 @@ data:
     kubectl delete secret ${GITEA_ADMIN_SECRET_NAME} -n ${NAMESPACE}
     kubectl create secret generic ${GITEA_ADMIN_SECRET_NAME} -n ${NAMESPACE} --from-env-file=/tmp/tmpdata/.log.txt
     echo "created admin token secret: '${GITEA_ADMIN_SECRET_NAME}' in '${NAMESPACE}' created"
+    {{- if and .Values.initUser.oidc.enabled -}}
+    # configure the oicd part
+    kubectl exec -i svc/{{ template "fullname" . }}-ssh -c gitea -n ${NAMESPACE} -- /bin/bash -c "su git -c 'gitea admin add-oauth --name ${OIDC_NAME} --provider ${OIDC_PROVIDER} --key ${OIDC_CLIENT_KEY} --secret ${OIDC_CLIENT_SECRET} --auto-discover-url ${OIDC_AUTO_DISCOVER_URL}'"
+    {{ end }}
+
 ---
 apiVersion: batch/v1
 kind: Job
@@ -82,6 +87,7 @@ spec:
         image: bitnami/kubectl
         command: ["/usr/local/bin/entrypoint.sh"]
         env:
+        # TODO move a subset of envs to a secret !
         - name: NAMESPACE
           valueFrom:
             fieldRef:
@@ -92,6 +98,19 @@ spec:
           value: "localadmin"
         - name: USER_EMAIL
           value: "localadmin@locahost.local"
+        {{- if and .Values.initUser.oidc.enabled -}}
+        ########
+        - name: OIDC_NAME
+          value: "{{ .Values.initUser.oidc.name }}"
+        - name: OIDC_PROVIDER
+          value: "{{ .Values.initUser.oidc.provider }}"
+        - name: OIDC_CLIENT_KEY
+          value: "{{ .Values.initUser.oidc.clientKey }}"
+        - name: OIDC_CLIENT_SECRET
+          value: "{{ .Values.initUser.oidc.clientSecret }}"
+        - name: OIDC_AUTO_DISCOVER_URL
+          value: "{{ .Values.initUser.oidc.autoDiscoverUrl }}"
+        {{ end }}
         volumeMounts:
         - name: tmpdata
           mountPath: /tmp/tmpdata

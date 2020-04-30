@@ -190,6 +190,13 @@ initUser:
   enabled: false
   # existingServiceAccount: 'secret'
   secretName: gitea-admin-token
+  oidc:
+    enabled: false
+    name:
+    provider:
+    clientKey:
+    clientSecret:
+
   rbac:
     create: true
     serviceAccount:
