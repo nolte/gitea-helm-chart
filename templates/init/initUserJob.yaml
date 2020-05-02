@@ -65,7 +65,7 @@ data:
     echo "created admin token secret: '${GITEA_ADMIN_SECRET_NAME}' in '${NAMESPACE}' created"
     {{- if and .Values.initUser.oidc.enabled -}}
     # configure the oicd part
-    kubectl exec -i svc/{{ template "fullname" . }}-ssh -c gitea -n ${NAMESPACE} -- /bin/bash -c "su git -c 'gitea admin add-oauth --name ${OIDC_NAME} --provider ${OIDC_PROVIDER} --key ${OIDC_CLIENT_KEY} --secret ${OIDC_CLIENT_SECRET} --auto-discover-url ${OIDC_AUTO_DISCOVER_URL}'"
+    kubectl exec -i svc/{{ template "fullname" . }}-ssh -c gitea -n ${NAMESPACE} -- /bin/bash -c "su git -c 'gitea admin auth add-oauth --name ${OIDC_NAME} --provider ${OIDC_PROVIDER} --key ${OIDC_CLIENT_KEY} --secret ${OIDC_CLIENT_SECRET} --auto-discover-url ${OIDC_AUTO_DISCOVER_URL}'"
     {{ end }}
 
 ---
