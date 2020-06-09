@@ -199,5 +199,5 @@ initUser:
     serviceAccount:
       create: true
       name: ""
-#deployment:
-#  annotations: []
+deployment:
+  annotations: {}

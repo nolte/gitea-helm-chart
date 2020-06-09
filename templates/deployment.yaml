@@ -5,9 +5,9 @@ metadata:
   name: {{ template "fullname" . }}
   labels:
     {{- include "gitea.labels" . | nindent 4 }}
-{{- with .Values.deployment.annotations }}
+{{- if .Values.deployment.annotations }}
   annotations:
-{{ toYaml . | indent 4 }}
+{{ toYaml .Values.deployment.annotations | indent 4 }}
 {{- end }}
 spec:
   replicas: 1
