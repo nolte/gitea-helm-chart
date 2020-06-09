@@ -27,7 +27,6 @@ ingress:
   #   nginx.ingress.kubernetes.io/proxy-body-size: "0"
   #   nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
   #   nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-
   ## tls support for the ingress
   # tls:
   #   - secretName: <TLS_SECRET>
@@ -141,12 +140,10 @@ inPodPostgres:
   ## ref: https://github.com/docker-library/docs/blob/master/postgres/content.md#postgres_initdb_args
   ## ref: https://www.postgresql.org/docs/current/static/app-initdb.html
   # postgresInitdbArgs:
-
   ## Specify runtime config parameters as a dict, using camelCase, e.g.
   ## {"sharedBuffers": "500MB"}
   ## ref: https://www.postgresql.org/docs/current/static/runtime-config.html
   # postgresConfig:
-
 
 ## Node labels and tolerations for pod assignment
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
@@ -161,7 +158,7 @@ podAnnotations: {}
 
 ## In order to disable initial install screen you must have secretKey and disableInstaller=true
 config:
-#  secretKey: define_your_secret
+  #  secretKey: define_your_secret
   disableInstaller: false
   offlineMode: false
   requireSignin: false
@@ -202,3 +199,5 @@ initUser:
     serviceAccount:
       create: true
       name: ""
+#deployment:
+#  annotations: []
