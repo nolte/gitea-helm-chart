@@ -199,5 +199,8 @@ initUser:
     serviceAccount:
       create: true
       name: ""
+
 deployment:
   annotations: {}
+  template:
+    annotations: {}

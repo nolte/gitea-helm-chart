@@ -18,6 +18,10 @@ spec:
     metadata:
       labels:
         app: {{ template "fullname" . }}
+{{- if .Values.deployment.template.annotations }}
+      annotations:
+{{ toYaml .Values.deployment.template.annotations | indent 8 }}
+{{- end }}
     spec:
       containers:
       {{- if .Values.useInPodPostgres }}
