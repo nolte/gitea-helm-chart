@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,10 +17,10 @@ spec:
     metadata:
       labels:
         app: {{ template "fullname" . }}
-{{- if .Values.deployment.template.annotations }}
+      {{- with .Values.podAnnotations }}
       annotations:
-{{ toYaml .Values.deployment.template.annotations | indent 8 }}
-{{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       containers:
       {{- if .Values.useInPodPostgres }}
