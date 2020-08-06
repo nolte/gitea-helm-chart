@@ -1,10 +1,10 @@
-apiVersion: v1
+apiVersion: v2
 name: gitea
-version: 1.10.1
-appVersion: 1.10.3
+version: 0.2.4
+appVersion: 1.12.2
 description: Git with a cup of tea
 icon: https://docs.gitea.io/images/gitea.png
-home: https://gitea.io
+home: https://github.com/jfelten/gitea-helm-chart
 keywords:
   - git
   - issue tracker
