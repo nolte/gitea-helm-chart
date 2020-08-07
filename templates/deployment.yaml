@@ -12,11 +12,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "fullname" . }}
+{{- include "gitea.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
+{{- include "gitea.selectorLabels" . | nindent 8 }}
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}

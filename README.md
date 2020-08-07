@@ -35,7 +35,7 @@ or locally:
 ``` bash
 $ helm install --name gitea --namespace tools .
 
-$ helm install gitea --namespace tools . # for helm3
+$ helm upgrade -i gitea --namespace tools . # for helm3
 ```
 
 > **Tip**: You can use the default [values.yaml](values.yaml)
