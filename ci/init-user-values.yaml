@@ -1,2 +1,7 @@
+resources:
+  gitea: {}
+  postgres: {}
+  memcached: {}
+
 initUser:
   enabled: true
