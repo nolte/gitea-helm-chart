@@ -24,7 +24,31 @@ jobs:
       - name: Create the Kind Cluster for test
         run: |
           go run mage.go -v kind:recreate
-
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yamllint yamale
+      - name: install helm3
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      - name: install chart testing
+        run: |
+          export HELM_CHART_TESTING_VERSION=3.0.0
+          mkdir -p /tmp/chart-testing \
+            && curl -L https://github.com/helm/chart-testing/releases/download/v${HELM_CHART_TESTING_VERSION}/chart-testing_${HELM_CHART_TESTING_VERSION}_linux_amd64.tar.gz -o /tmp/chart-testing/chart-testing.tar.gz \
+            && tar xvzf /tmp/chart-testing/chart-testing.tar.gz -C /tmp/chart-testing \
+            && mv /tmp/chart-testing/ct /usr/local/bin/ct \
+            && rm -rf /tmp/chart-testing \
+            && chmod +x /usr/local/bin/ct
+      - name: install helm3
+        run: |
+          export YQ_VERSION=3.3.2
+          curl -Lo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 \
+            && chmod +x /usr/local/bin/yq
       - name: Create the Kind Cluster for test
         run: |
           make build
