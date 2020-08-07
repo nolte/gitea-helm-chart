@@ -19,4 +19,4 @@ spec:
     {{- end }}
     targetPort: {{ .Values.service.http.port }}
   selector:
-    app: {{ template "fullname" . }}
+    {{- include "gitea.selectorLabels" . | nindent 4 }}
