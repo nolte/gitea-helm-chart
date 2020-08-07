@@ -1,0 +1,35 @@
+name: Helm Gitea CI
+on:
+  push:
+    branches: ["develop", "master"]
+  pull_request:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.14
+        id: go
+      - name: Run chart-testing (lint)
+        id: lint
+        uses: helm/chart-testing-action@v1.0.0
+        with:
+          command: lint
+      # https://github.com/engineerd/setup-kind
+      - uses: engineerd/setup-kind@v0.4.0
+        with:
+          skipClusterCreation: true
+
+      - name: Create the Kind Cluster for test
+        run: |
+          go run mage.go -v kind:recreate
+
+      - name: Run chart-testing (install)
+        uses: helm/chart-testing-action@v1.0.0
+        with:
+          command: install
