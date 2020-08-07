@@ -16,14 +16,6 @@ jobs:
           go-version: ^1.14
         id: go
 
-      - name: Fetch history
-        run: git fetch --prune --unshallow
-
-      - name: Run chart-testing (lint)
-        id: lint
-        uses: helm/chart-testing-action@v1.0.0
-        with:
-          command: lint
       # https://github.com/engineerd/setup-kind
       - uses: engineerd/setup-kind@v0.4.0
         with:
@@ -33,7 +25,11 @@ jobs:
         run: |
           go run mage.go -v kind:recreate
 
-      - name: Run chart-testing (install)
-        uses: helm/chart-testing-action@v1.0.0
-        with:
-          command: install
+      - name: Create the Kind Cluster for test
+        run: |
+          make build
+
+      - name: remove the kind cluster
+        if: ${{ always() }}
+        run: |
+          kind delete cluster
