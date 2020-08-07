@@ -1,7 +1,21 @@
-resources:
-  gitea: {}
-  postgres: {}
-  memcached: {}
+gitea:
+  requests:
+    memory: 500Mi
+    cpu: 200m
+  limits:
+    memory: 2Gi
+    cpu: 1
+postgres:
+  requests:
+    memory: 200Mi
+    cpu: 200m
+  limits:
+    memory: 2Gi
+    cpu: 1
+memcached:
+  requests:
+    memory: 64Mi
+    cpu: 50m
 
 initUser:
   enabled: true
