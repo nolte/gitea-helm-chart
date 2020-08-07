@@ -31,5 +31,5 @@ Create helm partial for memcached
   securityContext:
     runAsUser: 1000
   resources:
-{{ toYaml .Values.resources.memcached | indent 10 }}
+{{- toYaml .Values.resources.memcached |nindent 4 }}
 {{- end }}

@@ -4,6 +4,8 @@
 .DS_Store
 # Common VCS dirs
 .git/
+.devcontainer/
+.github/
 .gitignore
 .bzr/
 .bzrignore
@@ -19,3 +21,7 @@
 .project
 .idea/
 *.tmproj
+.yamllint
+Makefile
+.pre-commit-config.yaml
+.editorconfig

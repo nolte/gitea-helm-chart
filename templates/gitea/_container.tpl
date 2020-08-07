@@ -32,7 +32,7 @@ Create helm partial for gitea server
     successThreshold: 1
     failureThreshold: 3
   resources:
-{{ toYaml .Values.resources.gitea | indent 10 }}
+{{- toYaml .Values.resources.gitea | nindent 4 }}
   volumeMounts:
   - name: gitea-data
     mountPath: /data
